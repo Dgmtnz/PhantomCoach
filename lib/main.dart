@@ -1,30 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:phantom_coach/config/routes.dart';
 import 'package:phantom_coach/config/theme.dart';
-import 'package:phantom_coach/providers/auth_provider.dart';
-import 'package:phantom_coach/providers/workout_provider.dart';
-import 'package:phantom_coach/providers/nutrition_provider.dart';
 import 'package:phantom_coach/providers/settings_provider.dart';
+import 'package:phantom_coach/providers/auth_provider.dart';
 import 'package:phantom_coach/services/auth_service.dart';
-import 'package:phantom_coach/services/sheets_service.dart';
 
-Future<void> main() async {
+void main() {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "YOUR_API_KEY", // Replace with your Firebase API key
-      authDomain: "your-app.firebaseapp.com", // Replace with your Firebase auth domain
-      projectId: "your-app", // Replace with your Firebase project ID
-      storageBucket: "your-app.appspot.com", // Replace with your storage bucket
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your messaging sender ID
-      appId: "YOUR_APP_ID", // Replace with your Firebase app ID
-    ),
-  );
 
   // Run the app
   runApp(const PhantomCoachApp());
@@ -37,24 +21,14 @@ class PhantomCoachApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Auth provider
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(AuthService()),
-        ),
-        
-        // Workout provider
-        ChangeNotifierProvider(
-          create: (_) => WorkoutProvider(SheetsService()),
-        ),
-        
-        // Nutrition provider
-        ChangeNotifierProvider(
-          create: (_) => NutritionProvider(SheetsService()),
-        ),
-        
         // Settings provider
         ChangeNotifierProvider(
           create: (_) => SettingsProvider(),
+        ),
+        
+        // Auth provider - required for navigation
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(AuthService()),
         ),
       ],
       child: Consumer<SettingsProvider>(
@@ -64,10 +38,94 @@ class PhantomCoachApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.lightTheme, // TODO: Create a dark theme
             themeMode: settings.themeMode,
-            routerConfig: AppRouter.router,
             debugShowCheckedModeBanner: false,
+            routerConfig: AppRouter.router,
           );
         },
+      ),
+    );
+  }
+}
+
+// Keep this for reference
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Phantom Coach'),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.fitness_center,
+                  size: 80,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 40),
+              Text(
+                'PHANTOM COACH',
+                style: TextStyle(
+                  color: AppTheme.primaryColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Your personal fitness journey',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 60),
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to Welcome screen
+                  Navigator.of(context).pushNamed('/welcome');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32, 
+                    vertical: 16
+                  ),
+                ),
+                child: const Text(
+                  'GET STARTED',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
