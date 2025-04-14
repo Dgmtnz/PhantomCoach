@@ -9,6 +9,8 @@ import 'package:phantom_coach/services/auth_service.dart';
 void main() {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // No Firebase initialization for now - using mock services
 
   // Run the app
   runApp(const PhantomCoachApp());
@@ -26,7 +28,7 @@ class PhantomCoachApp extends StatelessWidget {
           create: (_) => SettingsProvider(),
         ),
         
-        // Auth provider - required for navigation
+        // Auth provider - using mock service
         ChangeNotifierProvider(
           create: (_) => AuthProvider(AuthService()),
         ),
