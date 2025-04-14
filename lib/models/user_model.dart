@@ -5,7 +5,6 @@ class User {
   final String? photoUrl;
   final UserProfile profile;
   final UserPreferences preferences;
-  final List<String> spreadsheetIds;
 
   User({
     required this.id,
@@ -14,7 +13,6 @@ class User {
     this.photoUrl,
     required this.profile,
     required this.preferences,
-    required this.spreadsheetIds,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -25,7 +23,6 @@ class User {
       photoUrl: json['photoUrl'] as String?,
       profile: UserProfile.fromJson(json['profile'] as Map<String, dynamic>),
       preferences: UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>),
-      spreadsheetIds: List<String>.from(json['spreadsheetIds'] as List),
     );
   }
 
@@ -37,7 +34,6 @@ class User {
       'photoUrl': photoUrl,
       'profile': profile.toJson(),
       'preferences': preferences.toJson(),
-      'spreadsheetIds': spreadsheetIds,
     };
   }
 
@@ -48,7 +44,6 @@ class User {
     String? photoUrl,
     UserProfile? profile,
     UserPreferences? preferences,
-    List<String>? spreadsheetIds,
   }) {
     return User(
       id: id ?? this.id,
@@ -57,149 +52,125 @@ class User {
       photoUrl: photoUrl ?? this.photoUrl,
       profile: profile ?? this.profile,
       preferences: preferences ?? this.preferences,
-      spreadsheetIds: spreadsheetIds ?? this.spreadsheetIds,
     );
   }
 }
 
 class UserProfile {
-  final int? age;
-  final double? heightCm;
-  final double? weightKg;
-  final String? gender;
-  final String? activityLevel;
-  final double? targetWeightKg;
-  final String? fitnessGoal;
-  final int? workoutsPerWeek;
+  final double height; // in cm
+  final double weight; // in kg
+  final DateTime birthDate;
+  final String gender;
+  final String activityLevel;
+  final String fitnessGoal;
 
   UserProfile({
-    this.age,
-    this.heightCm,
-    this.weightKg,
-    this.gender,
-    this.activityLevel,
-    this.targetWeightKg,
-    this.fitnessGoal,
-    this.workoutsPerWeek,
-  });
+    this.height = 170.0,
+    this.weight = 70.0,
+    DateTime? birthDate,
+    this.gender = 'Not specified',
+    this.activityLevel = 'Moderate',
+    this.fitnessGoal = 'General Fitness',
+  }) : birthDate = birthDate ?? DateTime(1990, 1, 1);
+
+  // Calculate age
+  int get age {
+    final today = DateTime.now();
+    final age = today.year - birthDate.year;
+    final monthDiff = today.month - birthDate.month;
+    
+    if (monthDiff < 0 || (monthDiff == 0 && today.day < birthDate.day)) {
+      return age - 1;
+    }
+    
+    return age;
+  }
+
+  // Calculate BMI
+  double get bmi {
+    if (height <= 0 || weight <= 0) return 0;
+    return weight / ((height / 100) * (height / 100));
+  }
+
+  // Create a copy with updated fields
+  UserProfile copyWith({
+    double? height,
+    double? weight,
+    DateTime? birthDate,
+    String? gender,
+    String? activityLevel,
+    String? fitnessGoal,
+  }) {
+    return UserProfile(
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
+      birthDate: birthDate ?? this.birthDate,
+      gender: gender ?? this.gender,
+      activityLevel: activityLevel ?? this.activityLevel,
+      fitnessGoal: fitnessGoal ?? this.fitnessGoal,
+    );
+  }
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      age: json['age'] as int?,
-      heightCm: json['heightCm'] as double?,
-      weightKg: json['weightKg'] as double?,
-      gender: json['gender'] as String?,
-      activityLevel: json['activityLevel'] as String?,
-      targetWeightKg: json['targetWeightKg'] as double?,
-      fitnessGoal: json['fitnessGoal'] as String?,
-      workoutsPerWeek: json['workoutsPerWeek'] as int?,
+      height: json['height'] as double? ?? 170.0,
+      weight: json['weight'] as double? ?? 70.0,
+      birthDate: DateTime.parse(json['birthDate'] as String),
+      gender: json['gender'] as String? ?? 'Not specified',
+      activityLevel: json['activityLevel'] as String? ?? 'Moderate',
+      fitnessGoal: json['fitnessGoal'] as String? ?? 'General Fitness',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'age': age,
-      'heightCm': heightCm,
-      'weightKg': weightKg,
+      'height': height,
+      'weight': weight,
+      'birthDate': birthDate.toIso8601String(),
       'gender': gender,
       'activityLevel': activityLevel,
-      'targetWeightKg': targetWeightKg,
       'fitnessGoal': fitnessGoal,
-      'workoutsPerWeek': workoutsPerWeek,
     };
-  }
-
-  UserProfile copyWith({
-    int? age,
-    double? heightCm,
-    double? weightKg,
-    String? gender,
-    String? activityLevel,
-    double? targetWeightKg,
-    String? fitnessGoal,
-    int? workoutsPerWeek,
-  }) {
-    return UserProfile(
-      age: age ?? this.age,
-      heightCm: heightCm ?? this.heightCm,
-      weightKg: weightKg ?? this.weightKg,
-      gender: gender ?? this.gender,
-      activityLevel: activityLevel ?? this.activityLevel,
-      targetWeightKg: targetWeightKg ?? this.targetWeightKg,
-      fitnessGoal: fitnessGoal ?? this.fitnessGoal,
-      workoutsPerWeek: workoutsPerWeek ?? this.workoutsPerWeek,
-    );
   }
 }
 
 class UserPreferences {
-  final bool isDarkMode;
   final bool useMetricSystem;
-  final bool showCalories;
-  final int restTimerSoundLevel;
-  final List<String> favoritedRoutines;
-  final bool enableNotifications;
-  final Map<String, dynamic> notificationSettings;
+  final bool darkModeEnabled;
+  final bool notificationsEnabled;
 
   UserPreferences({
-    this.isDarkMode = false,
     this.useMetricSystem = true,
-    this.showCalories = true,
-    this.restTimerSoundLevel = 7,
-    this.favoritedRoutines = const [],
-    this.enableNotifications = true,
-    this.notificationSettings = const {
-      'workout_reminder': true,
-      'weekly_summary': true,
-      'goal_achieved': true,
-    },
+    this.darkModeEnabled = false,
+    this.notificationsEnabled = true,
   });
+
+  // Create a copy with updated fields
+  UserPreferences copyWith({
+    bool? useMetricSystem,
+    bool? darkModeEnabled,
+    bool? notificationsEnabled,
+  }) {
+    return UserPreferences(
+      useMetricSystem: useMetricSystem ?? this.useMetricSystem,
+      darkModeEnabled: darkModeEnabled ?? this.darkModeEnabled,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+    );
+  }
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
     return UserPreferences(
-      isDarkMode: json['isDarkMode'] as bool? ?? false,
       useMetricSystem: json['useMetricSystem'] as bool? ?? true,
-      showCalories: json['showCalories'] as bool? ?? true,
-      restTimerSoundLevel: json['restTimerSoundLevel'] as int? ?? 7,
-      favoritedRoutines: List<String>.from(json['favoritedRoutines'] as List? ?? []),
-      enableNotifications: json['enableNotifications'] as bool? ?? true,
-      notificationSettings: json['notificationSettings'] as Map<String, dynamic>? ?? {
-        'workout_reminder': true,
-        'weekly_summary': true,
-        'goal_achieved': true,
-      },
+      darkModeEnabled: json['darkModeEnabled'] as bool? ?? false,
+      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'isDarkMode': isDarkMode,
       'useMetricSystem': useMetricSystem,
-      'showCalories': showCalories,
-      'restTimerSoundLevel': restTimerSoundLevel,
-      'favoritedRoutines': favoritedRoutines,
-      'enableNotifications': enableNotifications,
-      'notificationSettings': notificationSettings,
+      'darkModeEnabled': darkModeEnabled,
+      'notificationsEnabled': notificationsEnabled,
     };
-  }
-
-  UserPreferences copyWith({
-    bool? isDarkMode,
-    bool? useMetricSystem,
-    bool? showCalories,
-    int? restTimerSoundLevel,
-    List<String>? favoritedRoutines,
-    bool? enableNotifications,
-    Map<String, dynamic>? notificationSettings,
-  }) {
-    return UserPreferences(
-      isDarkMode: isDarkMode ?? this.isDarkMode,
-      useMetricSystem: useMetricSystem ?? this.useMetricSystem,
-      showCalories: showCalories ?? this.showCalories,
-      restTimerSoundLevel: restTimerSoundLevel ?? this.restTimerSoundLevel,
-      favoritedRoutines: favoritedRoutines ?? this.favoritedRoutines,
-      enableNotifications: enableNotifications ?? this.enableNotifications,
-      notificationSettings: notificationSettings ?? this.notificationSettings,
-    );
   }
 } 

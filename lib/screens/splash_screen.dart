@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:phantom_coach/config/theme.dart';
-import 'package:phantom_coach/providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,26 +13,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuthAndNavigate();
+    _navigateToNextScreen();
   }
 
-  Future<void> _checkAuthAndNavigate() async {
+  Future<void> _navigateToNextScreen() async {
     // Wait for a minimum splash display time of 2 seconds
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
 
-    // Check the authentication status and navigate accordingly
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final isLoggedIn = await authProvider.isLoggedIn();
-
-    if (!mounted) return;
-
-    if (isLoggedIn) {
-      context.go('/dashboard');
-    } else {
-      context.go('/login');
-    }
+    // For development, always navigate to welcome screen
+    context.go('/welcome');
   }
 
   @override
